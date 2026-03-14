@@ -12,13 +12,13 @@ Add real-time crypto prices, risk scores, AI forecasts, and more to any LangChai
 
 ```bash
 # Recommended: pin to current stable version
-npm install langchain-assistanthub@0.1.3
+npm install langchain-assistanthub@0.1.4
 
 # Or latest
 # npm install langchain-assistanthub
 ```
 
-> We're at v0.1.3 — pinned install recommended for stability. Check the [changelog](https://github.com/redman4220/langchain-assistanthub-js/releases) for updates!
+> We're at v0.1.4 — pinned install recommended for stability. Check the [changelog](https://github.com/redman4220/langchain-assistanthub-js/releases) for updates!
 
 ## Quick Start
 

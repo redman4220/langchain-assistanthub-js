@@ -43,6 +43,11 @@ export class AssistantHubToolkit {
     // Wire up x402 auto-payment if configured
     if (config.x402) {
       this.x402Handler = new X402PaymentHandler(config.x402);
+      // Pass telemetry context so payment events can be tracked
+      const anonId = Array.from(crypto.getRandomValues(new Uint8Array(8)))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      this.x402Handler.setContext(this.config.baseUrl, anonId, "0.1.4");
       this.client.setX402Handler(this.x402Handler);
     } else {
       this.x402Handler = null;
@@ -267,7 +272,7 @@ export class AssistantHubToolkit {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           event: "init",
-          version: "0.1.3",
+          version: "0.1.4",
           platform: "javascript",
           anon_id: anonId,
           auth_type: apiKey ? "api_key" : "anonymous",

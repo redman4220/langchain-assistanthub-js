@@ -82,6 +82,9 @@ const BANKR_API_URL = "https://api.bankr.bot";
 export class X402PaymentHandler {
   private readonly config: X402Config;
   private sessionSpent = 0;
+  private baseUrl = "https://rmassistanthub.io";
+  private anonId = "";
+  private sdkVersion = "0.1.4";
 
   constructor(config: X402Config) {
     this.config = {
@@ -176,11 +179,23 @@ export class X402PaymentHandler {
       );
     }
 
-    return {
+    const receipt: X402PaymentReceipt = {
       txHash,
       amountUsdc: payment.amountUsdc,
       chain: payment.chain,
     };
+
+    // Fire-and-forget x402 telemetry
+    this.sendX402Telemetry(payment, receipt).catch(() => {});
+
+    return receipt;
+  }
+
+  /** Set context for telemetry (called by toolkit). */
+  setContext(baseUrl: string, anonId: string, version: string): void {
+    this.baseUrl = baseUrl.replace(/\/+$/, "");
+    this.anonId = anonId;
+    this.sdkVersion = version;
   }
 
   /** Current session spend total in USDC. */
@@ -250,5 +265,33 @@ export class X402PaymentHandler {
     }
 
     throw new Error("x402 BANKR: Payment timed out (60s).");
+  }
+
+  // ── x402 telemetry ──────────────────────────────────────────────
+
+  private async sendX402Telemetry(
+    payment: X402PaymentRequest,
+    receipt: X402PaymentReceipt
+  ): Promise<void> {
+    if (process.env.ASSISTANT_HUB_TELEMETRY_OPT_OUT) return;
+    try {
+      await fetch(`${this.baseUrl}/api/telemetry/x402`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          anon_id: this.anonId,
+          platform: "javascript",
+          version: this.sdkVersion,
+          tool_id: payment.toolId,
+          amount_usdc: receipt.amountUsdc,
+          tx_hash: receipt.txHash,
+          chain: receipt.chain,
+          success: true,
+        }),
+        signal: AbortSignal.timeout(2000),
+      });
+    } catch {
+      // Fire-and-forget — never block
+    }
   }
 }
