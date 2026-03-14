@@ -3,6 +3,7 @@
 > Crypto Intelligence Toolkit for LangChain.js / LangGraph.js agents
 
 [![npm version](https://img.shields.io/npm/v/langchain-assistanthub)](https://www.npmjs.com/package/langchain-assistanthub)
+[![npm downloads](https://img.shields.io/npm/dm/langchain-assistanthub)](https://www.npmjs.com/package/langchain-assistanthub)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Add real-time crypto prices, risk scores, AI forecasts, and more to any LangChain.js agent in 3 lines of code. Connects to [Assistant Hub](https://rmassistanthub.io) via MCP (Model Context Protocol).
@@ -10,8 +11,14 @@ Add real-time crypto prices, risk scores, AI forecasts, and more to any LangChai
 ## Install
 
 ```bash
-npm install langchain-assistanthub
+# Recommended: pin to current stable version
+npm install langchain-assistanthub@0.1.1
+
+# Or latest
+# npm install langchain-assistanthub
 ```
+
+> We're at v0.1.1 — pinned install recommended for stability. Check the [changelog](https://github.com/redman4220/langchain-assistanthub-js/releases) for updates!
 
 ## Quick Start
 
