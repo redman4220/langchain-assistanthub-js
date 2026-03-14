@@ -2,7 +2,7 @@
  * AssistantHubToolkit — main entry point for LangChain.js integration.
  *
  * Usage:
- *   import { AssistantHubToolkit } from '@assistant-hub/langchain';
+ *   import { AssistantHubToolkit } from 'langchain-assistanthub';
  *   const toolkit = AssistantHubToolkit.fromApiKey('your-hub-api-key');
  *   const tools = toolkit.getTools();
  */
@@ -16,12 +16,15 @@ import type {
   ToolMetadata,
 } from "./types.js";
 import { DEFAULT_CONFIG, TOOL_REGISTRY } from "./types.js";
+import { X402PaymentHandler } from "./x402.js";
+import type { X402Config } from "./x402.js";
 
 export class AssistantHubToolkit {
   private readonly client: AssistantHubClient;
   private readonly config: Required<
     Pick<AssistantHubConfig, "includePremium" | "baseUrl">
   > & { toolFilter?: Set<string> };
+  private readonly x402Handler: X402PaymentHandler | null;
 
   constructor(config: AssistantHubConfig = {}) {
     this.client = new AssistantHubClient({
@@ -36,6 +39,14 @@ export class AssistantHubToolkit {
       includePremium: config.includePremium ?? DEFAULT_CONFIG.includePremium,
       toolFilter: config.tools ? new Set(config.tools) : undefined,
     };
+
+    // Wire up x402 auto-payment if configured
+    if (config.x402) {
+      this.x402Handler = new X402PaymentHandler(config.x402);
+      this.client.setX402Handler(this.x402Handler);
+    } else {
+      this.x402Handler = null;
+    }
 
     // Fire-and-forget telemetry ping
     this.sendTelemetry(config.apiKey).catch(() => {});
@@ -226,6 +237,21 @@ export class AssistantHubToolkit {
     ).map((d) => d.hubToolId);
   }
 
+  /**
+   * Get the x402 payment handler (if configured).
+   * Useful for checking session spend or resetting the counter.
+   *
+   * @example
+   * const handler = toolkit.x402;
+   * if (handler) {
+   *   console.log(`Session spend: $${handler.spent}`);
+   *   handler.resetSession();
+   * }
+   */
+  get x402(): X402PaymentHandler | null {
+    return this.x402Handler;
+  }
+
   // ── Private ─────────────────────────────────────────────────────
 
   private async sendTelemetry(apiKey?: string): Promise<void> {
@@ -241,7 +267,7 @@ export class AssistantHubToolkit {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           event: "init",
-          version: "0.1.2",
+          version: "0.1.3",
           platform: "javascript",
           anon_id: anonId,
           auth_type: apiKey ? "api_key" : "anonymous",

@@ -108,7 +108,10 @@ export function createTools(client: AssistantHubClient, options?: {
       schema,
       func: async (input: Record<string, unknown>) => {
         const reqParams = buildParams(def, input);
-        const result = await client.request(def.method, def.endpoint, reqParams);
+        const result = await client.request(def.method, def.endpoint, {
+          ...reqParams,
+          toolId: def.hubToolId,
+        });
         return JSON.stringify(result, null, 2);
       },
     });

@@ -1,7 +1,8 @@
 /**
  * HTTP client for Assistant Hub API.
  *
- * Handles authentication (JWT / API key), retries, and typed error responses.
+ * Handles authentication (JWT / API key), retries, typed error responses,
+ * and optional x402 auto-payment for premium tools.
  */
 
 import {
@@ -11,6 +12,7 @@ import {
   AssistantHubServerError,
 } from "./exceptions.js";
 import { DEFAULT_CONFIG } from "./types.js";
+import type { X402PaymentHandler } from "./x402.js";
 
 export interface ClientConfig {
   apiKey: string;
@@ -21,6 +23,7 @@ export interface ClientConfig {
 
 export class AssistantHubClient {
   private readonly config: ClientConfig;
+  private x402Handler: X402PaymentHandler | null = null;
 
   constructor(config: Partial<ClientConfig> & { apiKey?: string }) {
     this.config = {
@@ -31,9 +34,15 @@ export class AssistantHubClient {
     };
   }
 
-  private buildHeaders(): Record<string, string> {
+  /** Attach an x402 payment handler for auto-paying premium tool calls. */
+  setX402Handler(handler: X402PaymentHandler): void {
+    this.x402Handler = handler;
+  }
+
+  private buildHeaders(extra?: Record<string, string>): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      ...extra,
     };
 
     if (this.config.apiKey) {
@@ -53,6 +62,7 @@ export class AssistantHubClient {
     options?: {
       params?: Record<string, string>;
       body?: Record<string, unknown>;
+      toolId?: string;
     }
   ): Promise<unknown> {
     const headers = this.buildHeaders();
@@ -80,6 +90,10 @@ export class AssistantHubClient {
         const resp = await fetch(url, fetchOptions);
 
         if (resp.status === 402) {
+          // Try x402 auto-payment if configured
+          if (this.x402Handler?.isConfigured) {
+            return await this.handleX402Payment(resp, url, fetchOptions, options?.toolId);
+          }
           const detail = await this.extractDetail(resp, "Premium tool requires payment.");
           throw new AssistantHubPaymentRequiredError(detail);
         }
@@ -130,6 +144,57 @@ export class AssistantHubClient {
 
     return { error: "connection_failed", message: lastError?.message ?? "Unknown error" };
   }
+
+  // ── x402 auto-payment ───────────────────────────────────────────
+
+  private async handleX402Payment(
+    resp402: Response,
+    url: string,
+    originalFetchOptions: RequestInit,
+    toolId?: string
+  ): Promise<unknown> {
+    let body: Record<string, unknown> = {};
+    try {
+      body = (await resp402.json()) as Record<string, unknown>;
+    } catch {
+      // No JSON body — use header-only payment info
+    }
+
+    const payment = this.x402Handler!.parsePaymentRequest(
+      resp402,
+      body,
+      toolId ?? "unknown_tool"
+    );
+
+    // Execute payment
+    const receipt = await this.x402Handler!.pay(payment);
+
+    // Retry original request with payment receipt
+    const retryHeaders = this.buildHeaders({
+      "X-Payment-Receipt": receipt.txHash,
+      "X-Payment-Amount": String(receipt.amountUsdc),
+      "X-Payment-Chain": receipt.chain,
+    });
+
+    const retryOptions: RequestInit = {
+      ...originalFetchOptions,
+      headers: retryHeaders,
+    };
+
+    const retryResp = await fetch(url, retryOptions);
+
+    if (!retryResp.ok) {
+      const detail = await this.extractDetail(
+        retryResp,
+        `Payment sent (${receipt.txHash}) but request still failed (${retryResp.status}).`
+      );
+      throw new AssistantHubPaymentRequiredError(detail);
+    }
+
+    return await retryResp.json();
+  }
+
+  // ── Helpers ─────────────────────────────────────────────────────
 
   private async extractDetail(resp: Response, fallback: string): Promise<string> {
     try {

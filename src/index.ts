@@ -37,3 +37,12 @@ export {
   AssistantHubRateLimitError,
   AssistantHubServerError,
 } from "./exceptions.js";
+
+// x402 auto-payment
+export { X402PaymentHandler } from "./x402.js";
+export type {
+  X402Config,
+  X402PaymentRequest,
+  X402PaymentReceipt,
+  X402Signer,
+} from "./x402.js";

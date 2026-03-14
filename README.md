@@ -12,13 +12,13 @@ Add real-time crypto prices, risk scores, AI forecasts, and more to any LangChai
 
 ```bash
 # Recommended: pin to current stable version
-npm install langchain-assistanthub@0.1.2
+npm install langchain-assistanthub@0.1.3
 
 # Or latest
 # npm install langchain-assistanthub
 ```
 
-> We're at v0.1.2 — pinned install recommended for stability. Check the [changelog](https://github.com/redman4220/langchain-assistanthub-js/releases) for updates!
+> We're at v0.1.3 — pinned install recommended for stability. Check the [changelog](https://github.com/redman4220/langchain-assistanthub-js/releases) for updates!
 
 ## Quick Start
 
@@ -134,6 +134,58 @@ console.log(meta);
 //   stakingDiscountPct: 50,
 //   description: '...'
 // }
+```
+
+## x402 Auto-Payment (USDC on Base)
+
+Premium tools return HTTP 402 when payment is required. With x402 configured, the SDK auto-pays via USDC on Base and retries — zero friction for agents:
+
+### Option A: BANKR Agent Wallet (easiest — no private key needed)
+
+```typescript
+const toolkit = new AssistantHubToolkit({
+  apiKey: 'ahk_abc123',
+  x402: {
+    bankrApiKey: 'your-bankr-api-key',
+    maxPerCallUsdc: 0.10,     // safety cap per call (default: $0.10)
+    maxPerSessionUsdc: 1.00,  // safety cap per session (default: $1.00)
+    verbose: true,            // log payments to console
+  },
+});
+
+// Premium tools now auto-pay — no 402 errors!
+const tools = toolkit.getTools();
+```
+
+### Option B: Custom Signer (viem, ethers, etc.)
+
+```typescript
+import { createWalletClient, http } from 'viem';
+import { base } from 'viem/chains';
+
+const toolkit = new AssistantHubToolkit({
+  apiKey: 'ahk_abc123',
+  x402: {
+    signer: async (payment) => {
+      // Build and send USDC transfer, return tx hash
+      const txHash = await sendUsdcTransfer(
+        payment.recipientAddress,
+        payment.amountUsdc
+      );
+      return txHash;
+    },
+  },
+});
+```
+
+### Session Spend Tracking
+
+```typescript
+const handler = toolkit.x402;
+if (handler) {
+  console.log(`Session spend: $${handler.spent}`);
+  handler.resetSession(); // Reset counter
+}
 ```
 
 ## Error Handling

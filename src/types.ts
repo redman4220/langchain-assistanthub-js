@@ -122,6 +122,8 @@ export const TOOL_REGISTRY: ToolDefinition[] = [
 
 // ── Auth config ────────────────────────────────────────────────────
 
+import type { X402Config } from "./x402.js";
+
 export interface AssistantHubConfig {
   apiKey?: string;
   baseUrl?: string;
@@ -129,6 +131,8 @@ export interface AssistantHubConfig {
   tools?: string[];
   maxRetries?: number;
   timeout?: number;
+  /** x402 auto-payment config for premium tools. */
+  x402?: X402Config;
 }
 
 export const DEFAULT_CONFIG: Required<
