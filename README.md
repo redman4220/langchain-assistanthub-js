@@ -1,8 +1,8 @@
-# @assistant-hub/langchain
+# langchain-assistanthub
 
 > Crypto Intelligence Toolkit for LangChain.js / LangGraph.js agents
 
-[![npm version](https://img.shields.io/npm/v/@assistant-hub/langchain)](https://www.npmjs.com/package/@assistant-hub/langchain)
+[![npm version](https://img.shields.io/npm/v/langchain-assistanthub)](https://www.npmjs.com/package/langchain-assistanthub)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Add real-time crypto prices, risk scores, AI forecasts, and more to any LangChain.js agent in 3 lines of code. Connects to [Assistant Hub](https://rmassistanthub.io) via MCP (Model Context Protocol).
@@ -10,13 +10,13 @@ Add real-time crypto prices, risk scores, AI forecasts, and more to any LangChai
 ## Install
 
 ```bash
-npm install @assistant-hub/langchain
+npm install langchain-assistanthub
 ```
 
 ## Quick Start
 
 ```typescript
-import { AssistantHubToolkit } from '@assistant-hub/langchain';
+import { AssistantHubToolkit } from 'langchain-assistanthub';
 import { createReactAgent } from '@langchain/langgraph/prebuilt';
 import { ChatOpenAI } from '@langchain/openai';
 
@@ -140,7 +140,7 @@ import {
   AssistantHubPaymentRequiredError,
   AssistantHubForbiddenError,
   AssistantHubServerError,
-} from '@assistant-hub/langchain';
+} from 'langchain-assistanthub';
 
 try {
   await tool.invoke({ coin: 'BTC' });

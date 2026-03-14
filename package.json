@@ -1,5 +1,5 @@
 {
-  "name": "@assistant-hub/langchain",
+  "name": "langchain-assistanthub",
   "version": "0.1.0",
   "description": "LangChain.js toolkit for Assistant Hub — crypto intelligence via MCP",
   "type": "module",
