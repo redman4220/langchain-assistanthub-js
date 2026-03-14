@@ -1,0 +1,70 @@
+{
+  "name": "@assistant-hub/langchain",
+  "version": "0.1.0",
+  "description": "LangChain.js toolkit for Assistant Hub — crypto intelligence via MCP",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "langchain",
+    "langchainjs",
+    "crypto",
+    "trading",
+    "mcp",
+    "model-context-protocol",
+    "x402",
+    "usdc",
+    "ai-agents",
+    "defi",
+    "assistant-hub"
+  ],
+  "author": "Red Man",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/redman4220/langchain-assistanthub-js.git"
+  },
+  "homepage": "https://rmassistanthub.io/docs#langchain",
+  "bugs": {
+    "url": "https://github.com/redman4220/langchain-assistanthub-js/issues"
+  },
+  "dependencies": {
+    "@langchain/core": ">=0.2.0",
+    "zod": "^3.22.0"
+  },
+  "peerDependencies": {
+    "@langchain/mcp-adapters": ">=0.2.0"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/mcp-adapters": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@langchain/mcp-adapters": "^0.2.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
