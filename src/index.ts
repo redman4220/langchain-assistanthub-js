@@ -1,11 +1,11 @@
 /**
- * @assistant-hub/langchain — Crypto Intelligence Toolkit for LangChain.js
+ * langchain-assistanthub — Crypto Intelligence Toolkit for LangChain.js
  *
  * The easiest way to add real-time crypto intelligence to any
  * LangChain.js / LangGraph.js agent.
  *
  * @example
- * import { AssistantHubToolkit } from '@assistant-hub/langchain';
+ * import { AssistantHubToolkit } from 'langchain-assistanthub';
  *
  * const toolkit = AssistantHubToolkit.fromApiKey('your-hub-api-key');
  * const tools = toolkit.getTools();
