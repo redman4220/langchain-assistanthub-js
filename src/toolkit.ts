@@ -242,7 +242,7 @@ export class AssistantHubToolkit {
         body: JSON.stringify({
           event: "init",
           version: "0.1.0",
-          sdk: "js",
+          platform: "javascript",
           anon_id: anonId,
           auth_type: apiKey ? "api_key" : "anonymous",
         }),
